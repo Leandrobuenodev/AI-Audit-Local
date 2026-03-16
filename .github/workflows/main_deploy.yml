@@ -1,0 +1,33 @@
+name: Deploy Azure Function
+
+on:
+  push:
+    branches:
+      - main  # Verifique se sua branch é main ou master
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: 'Setup DotNet 8.0'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 'Restore and Build'
+        run: |
+          dotnet restore
+          dotnet build --configuration Release
+
+      - name: 'Publish'
+        run: dotnet publish --configuration Release --output ./publish
+
+      - name: 'Deploy to Azure Functions'
+        uses: Azure/functions-action@v1
+        with:
+          app-name: 'Function-Leandro' 
+          package: ./publish
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
