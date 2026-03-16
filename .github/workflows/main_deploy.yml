@@ -3,7 +3,7 @@ name: Deploy Azure Function
 on:
   push:
     branches:
-      - main  # Verifique se sua branch é main ou master
+      - main  # Certifique-se de que sua branch principal se chama 'main'
 
 jobs:
   build-and-deploy:
@@ -13,21 +13,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 'Setup DotNet 8.0'
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: 'Restore and Build'
-        run: |
-          dotnet restore
-          dotnet build --configuration Release
+      - name: 'Restore Dependencies'
+        run: dotnet restore PipelineDocAuditor.csproj
 
-      - name: 'Publish'
-        run: dotnet publish --configuration Release --output ./publish
+      - name: 'Build Project'
+        run: dotnet build PipelineDocAuditor.csproj --configuration Release
+
+      - name: 'Publish Project'
+        run: dotnet publish PipelineDocAuditor.csproj --configuration Release --output ./publish
 
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
         with:
-          app-name: 'Function-Leandro' 
+          app-name: 'Function-Leandro' # <--- Troque pelo nome da sua Function na Azure
           package: ./publish
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
