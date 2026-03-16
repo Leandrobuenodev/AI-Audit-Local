@@ -29,6 +29,7 @@ jobs:
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
         with:
-          app-name: 'Function-Leandro' # <--- Troque pelo nome da sua Function na Azure
+          app-name: 'Function-Leandro' # <--- Verifique se este nome está IGUAL na Azure
           package: ./publish
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          slot-name: 'production'
