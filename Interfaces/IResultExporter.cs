@@ -5,6 +5,6 @@ namespace PipelineDocAuditor.Interfaces
 {
     public interface IResultExporter
     {
-        Task ExportResultsAsync(ExecutionReport report, string fileName, string outputPath);
+        Task ExportResultsAsync(ExecutionReport report, string fileName, string outputDir);
     }
 }

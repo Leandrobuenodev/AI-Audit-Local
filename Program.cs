@@ -1,31 +1,29 @@
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Azure.Functions.Worker;
+using PipelineDocAuditor.Services;
 using PipelineDocAuditor.Interfaces;
 using PipelineDocAuditor.Infrastructure;
-using PipelineDocAuditor.Services;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
+    .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((context, services) =>
     {
-        IConfiguration config = context.Configuration;
+        // Garante que o Worker não morra imediatamente se o Azurite oscilar
+        services.AddHttpClient();
 
-        services.AddSingleton<DocumentIntelligenceProcessor>(sp =>
-        {
-            return new DocumentIntelligenceProcessor(config["AzureDocIntelligenceEndpoint"] ?? "", config["AzureDocIntelligenceKey"] ?? "");
-        });
+        services.AddSingleton(sp =>
+            new DocumentIntelligenceProcessor(
+                context.Configuration["AzureDocIntelligenceEndpoint"] ?? "",
+                context.Configuration["AzureDocIntelligenceKey"] ?? ""
+            ));
 
-        services.AddSingleton<IDocumentProcessor>(sp =>
-        {
-            return new AzureDocumentProcessor(config["AzureDocIntelligenceEndpoint"] ?? "", config["AzureDocIntelligenceKey"] ?? "");
-        });
-
-        services.AddScoped<IAuditService>(sp =>
-        {
-            return new OpenAiAuditService(config["AzureOpenAIEndpoint"] ?? "", config["AzureOpenAIKey"] ?? "", config["AzureOpenAIDeployment"] ?? "");
-        });
+        services.AddSingleton<IAuditService>(sp =>
+            new OpenAiAuditService(
+                context.Configuration["AzureOpenAIEndpoint"] ?? "",
+                context.Configuration["AzureOpenAIKey"] ?? "",
+                context.Configuration["AzureOpenAIDeployment"] ?? ""
+            ));
 
         services.AddSingleton<IResultExporter, WordResultExporter>();
     })
